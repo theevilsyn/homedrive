@@ -1,0 +1,15 @@
+client/ServerRack/*.iml
+client/ServerRack/.gradle
+client/ServerRack/local.properties
+client/ServerRack/.idea/caches
+client/ServerRack/.idea/libraries
+client/ServerRack/.idea/modules.xml
+client/ServerRack/.idea/workspace.xml
+client/ServerRack/.idea/navEditor.xml
+client/ServerRack/.idea/assetWizardSettings.xml
+client/ServerRack/.DS_Store
+client/ServerRack/build
+client/ServerRack/captures
+client/ServerRack/.externalNativeBuild
+client/ServerRack/.cxx
+client/ServerRack/local.properties
