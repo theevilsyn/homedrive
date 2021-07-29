@@ -4,7 +4,7 @@ RUN apt update; apt -y --autoremove full-upgrade
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt install gcc -y
 
-COPY . /app
+COPY api /app
 WORKDIR /app
 RUN pip install -r requirements.txt
 EXPOSE 5001
