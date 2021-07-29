@@ -54,9 +54,35 @@
 		{
 			"name": "Upload File",
 			"request": {
-				"method": "GET",
-				"header": [],
-				"url": null
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-access-token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiJkNTRiOGFjMS1iMTFkLTQ2MzYtODA5NS01ZWNiN2UyYzYzOTEiLCJleHAiOjE2Mjc1OTc2MzV9.spt_DvunSdSUpkgImjgtmeh9BUYSI2gn35-qqxFZT6w",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/f4lc0n/Documents/Screenshot 2021-07-24 at 7.15.57 PM.png"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:5000/file-upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"file-upload"
+					]
+				}
 			},
 			"response": []
 		}
