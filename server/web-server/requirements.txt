@@ -1,1 +1,5 @@
-flask
+Flask
+PyJWT
+Flask-SqlAlchemy
+SQLAlchemy
+Werkzeug

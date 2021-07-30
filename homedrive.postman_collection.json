@@ -1,0 +1,174 @@
+{
+	"info": {
+		"_postman_id": "ededfdce-aa8d-4103-acf4-61a8dd65badc",
+		"name": "homedrive",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"username\": \"falcon\", \"password\": \"12345\", \"email\": \"mail@mail.com\"}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"username\": \"falcon\", \"password\": \"12345\"}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-access-token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiJkNTRiOGFjMS1iMTFkLTQ2MzYtODA5NS01ZWNiN2UyYzYzOTEiLCJleHAiOjE2Mjc1OTc2MzV9.spt_DvunSdSUpkgImjgtmeh9BUYSI2gn35-qqxFZT6w",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/f4lc0n/Documents/Screenshot 2021-07-24 at 7.15.57 PM.png"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:5000/file-upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"file-upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "listfiles",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-access-token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiJmM2Y1ODYyNi1hNDBmLTRlNmQtYjczYi0wZDlkNDc0ZGY0MzMiLCJleHAiOjE2Mjc2Mjk3NjB9.1oyYRo2B0pgrowjXul7uk8mqY4Vk6yLL6vpUNP8zVr4",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/list",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "download file",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-access-token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiIyZTk0M2M2OC00NWQ0LTQyY2YtYmFiMC0xOWJiMjBkM2YyNWQiLCJleHAiOjE2Mjc2Mjk1NTh9.YOBF-QeeV6SeulAe-KOwCfdTN9RoHR685FX59RRnSwg",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/download/Screenshot 2021-07-30 at 11.35.39 AM.png",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"download",
+						"Screenshot 2021-07-30 at 11.35.39 AM.png"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete file",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-access-token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiJmM2Y1ODYyNi1hNDBmLTRlNmQtYjczYi0wZDlkNDc0ZGY0MzMiLCJleHAiOjE2Mjc2Mjk3NjB9.1oyYRo2B0pgrowjXul7uk8mqY4Vk6yLL6vpUNP8zVr4",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/delete/Screenshot 2021-07-30 at 11.35.39 AM.png",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"delete",
+						"Screenshot 2021-07-30 at 11.35.39 AM.png"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		}
+	]
+}

@@ -33,6 +33,8 @@ services:
         build: ./racks/rack1
         image: pentest/private.rack1
         restart: unless-stopped
+        ports:
+          - 2121:0021
         networks:
             default:
                 ipv4_address: 172.30.0.3
@@ -43,7 +45,7 @@ services:
         image: pentest/private.web-server
         restart: unless-stopped
         ports: 
-          - 5001:5001
+          - 5000:5000
         dns: 
           - rackdns
         networks:

@@ -1,17 +1,12 @@
-FROM ubuntu:18.04
-LABEL MAINTAINER Jaswanth Bommidi <mail@evilsyn.com>
+FROM alpine:3.13
+RUN apk --no-cache add vsftpd
 
-RUN apt update; apt -y --autoremove full-upgrade
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt install vsftpd ftp -y
+COPY start.sh /bin/start.sh
+COPY vsftpd.conf /etc/vsftpd/vsftpd.conf
 
-# RUN apt-get autoremove
-# RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+EXPOSE 21 21
+RUN mkdir /ftp
 
-COPY vsftpd.conf /etc/vsftpd.conf
-COPY entrypoint.sh /root/start.sh
+STOPSIGNAL SIGKILL
 
-RUN bash -c "useradd -m racka -s /bin/bash"
-RUN bash -c "echo racka:rackapassword | chpasswd"
-
-ENTRYPOINT [ "bash", "/root/start.sh"]
+ENTRYPOINT ["/bin/start.sh"]
