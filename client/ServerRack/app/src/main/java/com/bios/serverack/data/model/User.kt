@@ -1,4 +1,4 @@
-package com.bios.serverack.model
+package com.bios.serverack.data.model
 
 data class User(
     val username: String?,
