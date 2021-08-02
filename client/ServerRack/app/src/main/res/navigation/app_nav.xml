@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.bios.serverack.ui.LoginFragment"
+        android:name="com.bios.serverack.ui.Login.LoginFragment"
         android:label="LoginFragment">
         <action
             android:id="@+id/action_loginFragment_to_signupFragment"
@@ -14,7 +14,7 @@
     </fragment>
     <fragment
         android:id="@+id/signupFragment"
-        android:name="com.bios.serverack.ui.SignupFragment"
+        android:name="com.bios.serverack.ui.Signup.SignupFragment"
         android:label="SignupFragment">
         <action
             android:id="@+id/action_signupFragment_to_loginFragment"
