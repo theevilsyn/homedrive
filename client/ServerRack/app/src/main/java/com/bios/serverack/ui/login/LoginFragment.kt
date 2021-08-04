@@ -1,4 +1,4 @@
-package com.bios.serverack.ui.Login
+package com.bios.serverack.ui.login
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bios.serverack.R
@@ -38,12 +37,15 @@ class LoginFragment : Fragment() {
 
         loginViewModel.doLogin.observe(viewLifecycleOwner, {
             if (it) {
-                //TODO: Do Something
+                this.findNavController()
+                    .navigate(LoginFragmentDirections.actionLoginFragmentToFilesFragment())
+
             }
         })
 
         loginBinding.createAccount.setOnClickListener {
-            this.findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToSignupFragment())
+            this.findNavController()
+                .navigate(LoginFragmentDirections.actionLoginFragmentToSignupFragment())
         }
 
         return loginBinding.root

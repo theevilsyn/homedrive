@@ -1,20 +1,21 @@
 package com.bios.serverack
 
-enum class Status {
-    SUCCESS,
-    ERROR,
-    LOADING
-}
+import com.bios.serverack.data.model.Message
+import org.json.JSONArray
+import org.json.JSONObject
 
-data class Resource<out T>(val status: Status, val data: T?, val message: String?) {
-    companion object {
-        fun <T> success(data: T): Resource<T> =
-            Resource(status = Status.SUCCESS, data = data, message = null)
+object Utils {
 
-        fun <T> error(data: T?, message: String): Resource<T> =
-            Resource(status = Status.ERROR, data = data, message = message)
 
-        fun <T> loading(data: T?): Resource<T> =
-            Resource(status = Status.LOADING, data = data, message = null)
+    fun filesDataConverter(data: String): ArrayList<Message> {
+        val fileListArray = JSONObject(data).getJSONArray("message")
+        val arrayList = ArrayList<Message>()
+        for (i in 0 until fileListArray.length()) {
+            val filename = fileListArray.getJSONObject(i).getString("filename");
+            val size = fileListArray.getJSONObject(i).getInt("size");
+            arrayList.add(Message(i,filename, size))
+        }
+        return arrayList
     }
 }
+
