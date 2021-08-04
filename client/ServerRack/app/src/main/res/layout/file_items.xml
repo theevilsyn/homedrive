@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="message"
+            type="com.bios.serverack.data.model.Message" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp">
+
+        <TextView
+            android:id="@+id/itemNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:text="File Name :"
+            app:layout_constraintBottom_toTopOf="@+id/sizeOfText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/sizeOfText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:text="File Size :"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/itemNameText" />
+
+        <TextView
+            android:id="@+id/itemName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:text="@{message.filename}"
+            app:layout_constraintBottom_toBottomOf="@+id/itemNameText"
+            app:layout_constraintStart_toEndOf="@id/itemNameText"
+            app:layout_constraintTop_toTopOf="@+id/itemNameText" />
+
+        <TextView
+            android:id="@+id/itemSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:text="@{String.valueOf(message.size)}"
+            app:layout_constraintBottom_toBottomOf="@+id/sizeOfText"
+            app:layout_constraintStart_toEndOf="@+id/sizeOfText"
+            app:layout_constraintTop_toTopOf="@+id/sizeOfText" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,4 +1,4 @@
-package com.bios.serverack.ui.Signup
+package com.bios.serverack.ui.signup
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

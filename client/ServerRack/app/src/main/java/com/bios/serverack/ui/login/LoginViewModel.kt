@@ -1,4 +1,4 @@
-package com.bios.serverack.ui.Login
+package com.bios.serverack.ui.login
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -11,7 +11,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.Exception
-import kotlin.math.log
 
 class LoginViewModel : ViewModel() {
     private val viewModelJob = SupervisorJob()

@@ -9,14 +9,10 @@ import com.bios.serverack.R
 import com.bios.serverack.data.model.Signup
 import com.bios.serverack.data.model.User
 import com.bios.serverack.data.remote.ServiceBuilder.retrofitService
-import kotlinx.coroutines.Deferred
-import org.json.JSONObject
 
 class Repository {
     private val networkService = retrofitService
-    private val application: Application by lazy {
-        BiosApplication().instance
-    }
+    private val application: Application = BiosApplication.instance
 
     private val sharedPref: SharedPreferences by lazy {
         application.getSharedPreferences(
@@ -34,7 +30,17 @@ class Repository {
         return networkService.doSignUp(signup)
     }
 
+    suspend fun getFilesFromServer(): String? {
+        return getJWTToken()?.let { networkService.getAllFiles(it) }
+    }
+
+
     fun saveJWTToken(token: String) {
         sharedPref.edit().putString(application.getString(R.string.jwt_token), token).apply()
     }
+
+    fun getJWTToken() =
+        sharedPref.getString(application.getString(R.string.jwt_token), "")
+
+
 }
