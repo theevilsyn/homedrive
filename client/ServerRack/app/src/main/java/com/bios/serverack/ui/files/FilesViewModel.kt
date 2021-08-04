@@ -21,9 +21,14 @@ class FilesViewModel : ViewModel() {
     val messageHandler = MutableLiveData("")
     val messageData = MutableLiveData<List<Message>>()
 
+    init {
+        messageData.value = emptyList()
+        messageHandler.value = ""
+        networkHandler.value = false
+    }
 
     fun getFilesDataFromServer() {
-
+        messageData.value = emptyList()
         Log.i("TAG", "getFilesDataFromServer: ")
         viewModelScope.launch {
             val filesData: String? = try {
@@ -37,11 +42,32 @@ class FilesViewModel : ViewModel() {
                 val dataList = filesData?.let { Utils.filesDataConverter(it) }
                 messageData.value = dataList!!
                 networkHandler.value = true
-                Log.i("TAG", "getFilesDataFromServer: " + dataList?.size)
             } else {
                 messageHandler.value = JSONObject(filesData).getString("message")
-                networkHandler.value = false
+                networkHandler.value = true
             }
         }
+    }
+
+    fun deleteFile(message: Message) {
+        viewModelScope.launch {
+            var deleteFile = try {
+                repository.deleteFile(message.filename)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ""
+            }
+
+            if (JSONObject(deleteFile).getString("message") == "Successfully deleted!") {
+                messageHandler.value = JSONObject(deleteFile).getString("message")
+                getFilesDataFromServer()
+            } else {
+                messageHandler.value = JSONObject(deleteFile).getString("message")
+            }
+        }
+    }
+
+    fun downloadFile(message: Message) {
+        TODO("Not yet implemented")
     }
 }

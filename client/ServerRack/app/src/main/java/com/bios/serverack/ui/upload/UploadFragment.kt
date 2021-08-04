@@ -131,7 +131,7 @@ class UploadFragment : Fragment() {
     }
 
 
-    fun checkStoragePermissions() {
+    private fun checkStoragePermissions() {
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             arrayOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -159,4 +159,6 @@ class UploadFragment : Fragment() {
         Snackbar.make(uploadBinding.root, msg, len)
             .show()
     }
+
+
 }

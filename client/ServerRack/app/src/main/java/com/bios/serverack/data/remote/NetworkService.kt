@@ -54,6 +54,13 @@ interface NetworkService {
     suspend fun getAllFiles(@Header("x-access-token") token: String): String
 
 
+    @POST("delete/{filename}")
+    suspend fun deleteFile(
+        @Header("x-access-token") token: String,
+        @Path("filename") filename: String
+    ): String
+
+
 }
 
 object ServiceBuilder {

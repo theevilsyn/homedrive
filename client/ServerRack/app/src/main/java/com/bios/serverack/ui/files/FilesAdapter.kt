@@ -3,6 +3,7 @@ package com.bios.serverack.ui.files
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -10,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bios.serverack.data.model.Message
 import com.bios.serverack.databinding.FileItemsBinding
 
-class FilesAdapter : ListAdapter<Message, FileViewHolder>(FileItemCallBack()) {
+class FilesAdapter(private val onClickListener: OnClickListener) :
+    ListAdapter<Message, FileViewHolder>(FileItemCallBack()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         return FileViewHolder.from(parent)
@@ -18,14 +20,23 @@ class FilesAdapter : ListAdapter<Message, FileViewHolder>(FileItemCallBack()) {
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item)
-        Log.i("TAG", "bind:${item.filename} ")
+        holder.bind(item, onClickListener)
+    }
+
+    class OnClickListener(val clickListener: (message: Message, view: View) -> Unit) {
+        fun onClick(message: Message, view: View) = clickListener(message, view)
     }
 }
 
 class FileViewHolder(val binding: FileItemsBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: Message) = with(binding) {
+    fun bind(item: Message, onClickListener: FilesAdapter.OnClickListener) = with(binding) {
         binding.message = item
+        binding.deleteButton.setOnClickListener {
+            onClickListener.onClick(item, binding.deleteButton)
+        }
+        binding.downloadButton.setOnClickListener {
+            onClickListener.onClick(item, binding.downloadButton)
+        }
         Log.i("TAG", "bind:${item.filename} ")
         binding.executePendingBindings()
     }
@@ -51,3 +62,4 @@ class FileItemCallBack : DiffUtil.ItemCallback<Message>() {
 
 
 }
+
