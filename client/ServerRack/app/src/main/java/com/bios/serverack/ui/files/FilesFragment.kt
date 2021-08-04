@@ -11,6 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bios.serverack.R
+import com.bios.serverack.data.model.Message
 import com.bios.serverack.databinding.FragmentFilesBinding
 import com.google.android.material.snackbar.Snackbar
 
@@ -28,7 +29,7 @@ class FilesFragment : Fragment() {
         filesBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_files, container, false)
         fileViewModel.getFilesDataFromServer()
 
-        fileViewModel.networkHandler.observe(viewLifecycleOwner, Observer {
+        fileViewModel.networkHandler.observe(viewLifecycleOwner, {
             if (!it) {
                 filesBinding.filesProgressBar.visibility = View.VISIBLE
             } else {
@@ -36,28 +37,33 @@ class FilesFragment : Fragment() {
             }
         })
 
-        fileViewModel.messageHandler.observe(viewLifecycleOwner, Observer {
+        fileViewModel.messageHandler.observe(viewLifecycleOwner, {
             it?.let { it1 ->
                 if (it1.isNotEmpty()) {
                     showSnackBar(it1)
-                    filesBinding.filesProgressBar.visibility = View.GONE
                 } else {
                     showSnackBar("Loading data from server")
-                    filesBinding.filesProgressBar.visibility = View.GONE
                 }
             }
         })
-        fileViewModel.messageData.observe(viewLifecycleOwner, {
-            if (it.isNotEmpty()) {
-                filesAdapter = FilesAdapter()
-                filesBinding.filesList.apply {
-                    adapter = filesAdapter
-                    setHasFixedSize(true)
-                    layoutManager = LinearLayoutManager(activity)
-                }
-                filesAdapter.submitList(it)
 
+        fileViewModel.messageData.observe(viewLifecycleOwner, {
+            filesAdapter =
+                FilesAdapter(FilesAdapter.OnClickListener { message: Message, view: View ->
+                    if (view.id == R.id.deleteButton) {
+                        fileViewModel.deleteFile(message)
+                    } else {
+                        fileViewModel.downloadFile(message)
+                    }
+                })
+            filesBinding.filesList.apply {
+                adapter = filesAdapter
+                setHasFixedSize(true)
+                layoutManager = LinearLayoutManager(activity)
             }
+            filesAdapter.submitList(it)
+
+
         })
 
         filesBinding.uploadFiles.setOnClickListener {

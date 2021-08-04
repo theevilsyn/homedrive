@@ -38,6 +38,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
+            android:ellipsize="end"
+            android:maxLength="15"
             android:text="@{message.filename}"
             app:layout_constraintBottom_toBottomOf="@+id/itemNameText"
             app:layout_constraintStart_toEndOf="@id/itemNameText"
@@ -48,9 +50,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
+            android:ellipsize="end"
+            android:maxLength="15"
             android:text="@{String.valueOf(message.size)}"
             app:layout_constraintBottom_toBottomOf="@+id/sizeOfText"
             app:layout_constraintStart_toEndOf="@+id/sizeOfText"
             app:layout_constraintTop_toTopOf="@+id/sizeOfText" />
+
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="25dp"
+            android:text="Delete"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/downloadButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Download"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="@+id/deleteButton"
+            app:layout_constraintStart_toStartOf="@+id/deleteButton"
+            app:layout_constraintTop_toBottomOf="@+id/deleteButton" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

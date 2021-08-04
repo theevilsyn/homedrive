@@ -42,5 +42,9 @@ class Repository {
     fun getJWTToken() =
         sharedPref.getString(application.getString(R.string.jwt_token), "")
 
+    suspend fun deleteFile(filename: String): String {
+        return networkService.deleteFile(getJWTToken()!!, filename)
+    }
+
 
 }
