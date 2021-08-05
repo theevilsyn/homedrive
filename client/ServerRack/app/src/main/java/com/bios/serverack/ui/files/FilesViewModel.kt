@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody
 import org.json.JSONObject
 
 class FilesViewModel : ViewModel() {
@@ -68,6 +69,11 @@ class FilesViewModel : ViewModel() {
     }
 
     fun downloadFile(message: Message) {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            val deleteFile = repository.downloadFile(message.filename)
+            repository.saveFile(deleteFile.body()!!, message)
+        }
     }
+
+
 }
