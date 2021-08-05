@@ -6,7 +6,9 @@ import com.bios.serverack.data.model.User
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -59,6 +61,13 @@ interface NetworkService {
         @Header("x-access-token") token: String,
         @Path("filename") filename: String
     ): String
+
+    @Streaming
+    @GET("download/{filename}")
+    suspend fun downloadFile(
+        @Header("x-access-token") token: String,
+        @Path("filename") filename: String
+    ): Response<ResponseBody>
 
 
 }

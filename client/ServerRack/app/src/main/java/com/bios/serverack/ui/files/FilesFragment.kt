@@ -1,10 +1,13 @@
 package com.bios.serverack.ui.files
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -21,6 +24,19 @@ class FilesFragment : Fragment() {
     private val fileViewModel: FilesViewModel by viewModels()
     lateinit var filesBinding: FragmentFilesBinding
     private lateinit var filesAdapter: FilesAdapter
+    private lateinit var message: Message
+    private val checkPermission =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            var count = 0
+            for ((key, value) in it) {
+                if (value) {
+                    count++
+                }
+            }
+            if (count >= 2)
+                if (this::message.isInitialized)
+                    fileViewModel.downloadFile(message)
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,7 +69,8 @@ class FilesFragment : Fragment() {
                     if (view.id == R.id.deleteButton) {
                         fileViewModel.deleteFile(message)
                     } else {
-                        fileViewModel.downloadFile(message)
+                        this.message = message
+                        checkStoragePermissions()
                     }
                 })
             filesBinding.filesList.apply {
@@ -77,6 +94,22 @@ class FilesFragment : Fragment() {
     fun showSnackBar(msg: String, len: Int = Snackbar.LENGTH_SHORT) {
         Snackbar.make(filesBinding.root, msg, len)
             .show()
+    }
+
+    private fun checkStoragePermissions() {
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.MANAGE_EXTERNAL_STORAGE
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        }
+        checkPermission.launch(permissions)
     }
 
 }
