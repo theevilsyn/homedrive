@@ -143,7 +143,7 @@ def uploadFile(current_user):
 		
 		db.session.add(new_file)
 		db.session.commit()
-		
+
 		resp = jsonify({'message' : 'File successfully uploaded', "status_code": 201})
 		resp.status_code = 201
 		return resp
@@ -155,7 +155,12 @@ def uploadFile(current_user):
 @app.route("/download/<string:filename>", methods=['GET'])
 @token_required
 def downloadFile(current_user, filename):
-	rack = Files.query.filter_by(name=secure_filename(filename)).first().rack
+	try:
+		rack = Files.query.filter_by(name=secure_filename(filename)).first().rack
+	except AttributeError:
+		resp = jsonify({'message' : 'There is no such file, please try again!!', "status_code": 404})
+		resp.status_code = 404
+		return resp
 	try:
 		with FTP(f"rack{rack}", f"rack{rack}", passwd=f"passwordforstorage{rack}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
 			_.retrbinary(f"RETR {secure_filename(filename)}", __.write)
