@@ -184,7 +184,12 @@ def listFiles(current_user):
 @app.route("/delete/<string:filename>", methods=['POST'])
 @token_required
 def deleteFile(current_user, filename):
-	rack = Files.query.filter_by(name=secure_filename(filename)).first().rack
+	try:
+		rack = Files.query.filter_by(name=secure_filename(filename)).first().rack
+	except AttributeError:
+		resp = jsonify({'message' : 'There is no such file, please try again!!', "status_code": 404})
+		resp.status_code = 404
+		return resp
 	try:
 		with FTP(f"rack{rack}", f"rack{rack}", passwd=f"passwordforstorage{rack}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
 			_.delete(secure_filename(filename))
