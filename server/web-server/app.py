@@ -207,7 +207,7 @@ def deleteFile(current_user, filename):
 
 @app.route('/admin/config', methods=['POST'])
 @token_required
-def uploadFile(current_user):
+def configureServer(current_user):
 	# check if the post request has the file part
 	if 'file' not in request.files:
 		resp = jsonify({'message' : 'No file part in the request'})
