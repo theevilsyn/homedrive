@@ -19,25 +19,25 @@ services:
     #         default:
     #             ipv4_address: 172.30.0.2
 
-    exploiter:
-        <<: *limits
-        build: ./exploiter
-        image: pentest/private.exploiter
-        restart: unless-stopped
-        networks:
-            default:
-                ipv4_address: 172.30.0.2
+    # exploiter:
+    #     <<: *limits
+    #     build: ./exploiter
+    #     image: pentest/private.exploiter
+    #     restart: unless-stopped
+    #     networks:
+    #         default:
+    #             ipv4_address: 172.30.0.2
 
-    rack1:
-        <<: *limits
-        build: ./racks/rack1
-        image: pentest/private.rack1
-        restart: unless-stopped
-        ports:
-          - 2121:0021
-        networks:
-            default:
-                ipv4_address: 172.30.0.3
+    # rack1:
+    #     <<: *limits
+    #     build: ./racks/rack1
+    #     image: pentest/private.rack1
+    #     restart: unless-stopped
+    #     ports:
+    #       - 2121:0021
+    #     networks:
+    #         default:
+    #             ipv4_address: 172.30.0.3
 
     web-server:
         <<: *limits
@@ -51,8 +51,8 @@ services:
         networks:
             default:
                 ipv4_address: 172.30.0.8
-        depends_on:
-            - rack1
+        # depends_on:
+            # - rack1
 
 
 networks:

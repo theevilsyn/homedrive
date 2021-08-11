@@ -134,11 +134,16 @@ def uploadFile(current_user):
 		db.session.add(new_file)
 		db.session.commit()
 
-
-		with FTP(rack, rack, passwd=f"passwordforstorage{rack[-1]}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), "rb") as __:
-			_.storbinary(f"STOR {secure_filename(filename)}", __)
+		try:
+			_ =  FTP(rack, rack, passwd=f"passwordforstorage{rack[-1]}")
+			__ = open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), "rb")
+			_.storbinary(f"STOR {secure_filename(filename)}", __); _.close(); __.close()
 			os.remove(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)))
-		resp = jsonify({'message' : 'File successfully uploaded'})
+		except:
+			resp = jsonify({'message' : 'Something\'s Wrong with the Racks!!', "status_code": 503})
+			resp.status_code = 503
+			return resp
+		resp = jsonify({'message' : 'File successfully uploaded', "status_code": 201})
 		resp.status_code = 201
 		return resp
 	else:
@@ -150,8 +155,13 @@ def uploadFile(current_user):
 @token_required
 def downloadFile(current_user, filename):
 	rack = Files.query.filter_by(name=secure_filename(filename)).first().rack
-	with FTP(f"rack{rack}", f"rack{rack}", passwd=f"passwordforstorage{rack}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
-		_.retrbinary(f"RETR {secure_filename(filename)}", __.write)
+	try:
+		with FTP(f"rack{rack}", f"rack{rack}", passwd=f"passwordforstorage{rack}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
+			_.retrbinary(f"RETR {secure_filename(filename)}", __.write)
+	except:
+		resp = jsonify({'message' : 'Something\'s Wrong with the Racks!!', "status_code": 503})
+		resp.status_code = 503
+		return resp
 
 	__ = send_file(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), attachment_filename=filename) 
 	os.remove(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)))
@@ -169,12 +179,17 @@ def listFiles(current_user):
 @token_required
 def deleteFile(current_user, filename):
 	rack = Files.query.filter_by(name=secure_filename(filename)).first().rack
-	with FTP(f"rack{rack}", f"rack{rack}", passwd=f"passwordforstorage{rack}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
-		_.delete(secure_filename(filename))
+	try:
+		with FTP(f"rack{rack}", f"rack{rack}", passwd=f"passwordforstorage{rack}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
+			_.delete(secure_filename(filename))
+	except:
+		resp = jsonify({'message' : 'Something\'s Wrong with the Racks!!', "status_code": 503})
+		resp.status_code = 503
+		return resp
 
 	file = Files.query.filter_by(name=secure_filename(filename)).delete()
 	db.session.commit()
-	return jsonify({"message": "Successfully deleted!"})
+	return jsonify({"message": "Successfully deleted!", "status_code": 201})
 
 if __name__ == '__main__':
 	app.run(host="0.0.0.0", debug=True)
