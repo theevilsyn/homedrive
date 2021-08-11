@@ -3,3 +3,4 @@ PyJWT
 Flask-SqlAlchemy
 SQLAlchemy
 Werkzeug
+4.2b4

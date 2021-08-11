@@ -8,6 +8,7 @@ from ftplib import FTP
 from os import environ
 
 import jwt
+import yaml
 from flask import Flask, jsonify, make_response, request, send_file
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKey
@@ -22,6 +23,8 @@ app.config['SECRET_KEY'] = 'thisissecret' ## change this
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{environ['DB_PATH']}"
 app.config['UPLOAD_FOLDER'] = "/tmp"
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024
+
+
 
 db = SQLAlchemy(app)
 
@@ -201,6 +204,26 @@ def deleteFile(current_user, filename):
 	file = Files.query.filter_by(name=secure_filename(filename)).delete()
 	db.session.commit()
 	return jsonify({"message": "Successfully deleted!", "status_code": 201})
+
+@app.route('/admin/config', methods=['POST'])
+@token_required
+def uploadFile(current_user):
+	# check if the post request has the file part
+	if 'file' not in request.files:
+		resp = jsonify({'message' : 'No file part in the request'})
+		resp.status_code = 400
+		return resp
+	file = request.files['file']
+	if file.filename == '':
+		resp = jsonify({'message' : 'No file selected for uploading'})
+		resp.status_code = 400
+		return resp
+	if file:
+		filename = secure_filename(file.filename)
+		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+		resp = jsonify({'message' : 'YAML successfully loaded', "status_code": 201})
+		resp.status_code = 201
+		return resp
 
 if __name__ == '__main__':
 	app.run(host="0.0.0.0", debug=True)
