@@ -131,9 +131,6 @@ def uploadFile(current_user):
 			size=os.path.getsize(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 		)
 
-		db.session.add(new_file)
-		db.session.commit()
-
 		try:
 			_ =  FTP(rack, rack, passwd=f"passwordforstorage{rack[-1]}")
 			__ = open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), "rb")
@@ -143,6 +140,10 @@ def uploadFile(current_user):
 			resp = jsonify({'message' : 'Something\'s Wrong with the Racks!!', "status_code": 503})
 			resp.status_code = 503
 			return resp
+		
+		db.session.add(new_file)
+		db.session.commit()
+		
 		resp = jsonify({'message' : 'File successfully uploaded', "status_code": 201})
 		resp.status_code = 201
 		return resp
