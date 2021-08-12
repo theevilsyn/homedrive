@@ -19,14 +19,14 @@ services:
     #         default:
     #             ipv4_address: 172.30.0.2
 
-    # exploiter:
-    #     <<: *limits
-    #     build: ./exploiter
-    #     image: pentest/private.exploiter
-    #     restart: unless-stopped
-    #     networks:
-    #         default:
-    #             ipv4_address: 172.30.0.2
+    exploiter:
+        <<: *limits
+        build: ./exploiter
+        image: pentest/private.exploiter
+        restart: unless-stopped
+        networks:
+            default:
+                ipv4_address: 172.30.0.2
 
     # rack1:
     #     <<: *limits

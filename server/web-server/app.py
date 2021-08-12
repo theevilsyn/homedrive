@@ -8,6 +8,7 @@ from ftplib import FTP
 from os import environ
 
 import jwt
+from sqlalchemy.orm import immediateload
 import yaml
 from flask import Flask, jsonify, make_response, request, send_file
 from flask_sqlalchemy import SQLAlchemy
@@ -19,7 +20,8 @@ app = Flask(__name__)
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
-app.config['SECRET_KEY'] = 'thisissecret' ## change this
+app.config['PRIVATE_KEY'] = open(environ['PRIVATE_KEY']).read()
+app.config['PUBLIC_KEY'] = open(environ['PUBLIC_KEY']).read()
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{environ['DB_PATH']}"
 app.config['UPLOAD_FOLDER'] = "/tmp"
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024
@@ -57,14 +59,18 @@ def token_required(function):
 			token = request.headers['x-access-token']
 		if not token:
 			return jsonify({'message': 'Token is missing!'}), 401
-
 		try:
-			data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+			data = jwt.decode(token, app.config['PUBLIC_KEY'],algorithms=['HS256', 'RS256'])
+			if(data['username'] == 'admin'):
+				isAdmin = True
+			else:
+				isAdmin = False
 			current_user = User.query.filter_by(
-				public_id=data['public_id']).first()
-		except:
+				username=data['username']).first()
+		except Exception as e:
+			print(str(e))
 			return jsonify({'message': 'Token is invalid!'}), 401
-		return function(current_user, *args, **kwargs)
+		return function(current_user, isAdmin=isAdmin, *args, **kwargs)
 	return decorated
 
 
@@ -102,15 +108,17 @@ def login():
 		return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
 	if check_password_hash(user.password, auth['password']):
-		token = jwt.encode({'public_id': user.public_id, 'exp': datetime.datetime.utcnow(
-		) + datetime.timedelta(minutes=10)}, app.config['SECRET_KEY'])
-		return jsonify({'token': token})
+		token = jwt.encode({'username': user.username, 'exp': datetime.datetime.utcnow(
+		) + datetime.timedelta(minutes=10)}, app.config['PRIVATE_KEY'], algorithm="RS256")
+		
+		print(token)
+		return jsonify({'token': token.decode("utf-8")})
 
 	return make_response('Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
 @app.route('/upload', methods=['POST'])
 @token_required
-def uploadFile(current_user):
+def uploadFile(current_user, isAdmin):
 	# check if the post request has the file part
 	if 'file' not in request.files:
 		resp = jsonify({'message' : 'No file part in the request'})
@@ -157,7 +165,7 @@ def uploadFile(current_user):
 
 @app.route("/download/<string:filename>", methods=['GET'])
 @token_required
-def downloadFile(current_user, filename):
+def downloadFile(current_user, isAdmin, filename):
 	try:
 		rack = Files.query.filter_by(name=secure_filename(filename)).first().rack
 	except AttributeError:
@@ -178,7 +186,7 @@ def downloadFile(current_user, filename):
 
 @app.route("/list", methods=['GET'])
 @token_required
-def listFiles(current_user):
+def listFiles(current_user, isAdmin):
 	files = Files.query.filter_by(user_id=current_user.public_id).all()
 	if(not len(files)):
 		return jsonify({"message": "This user has no files."})
@@ -186,7 +194,7 @@ def listFiles(current_user):
 
 @app.route("/delete/<string:filename>", methods=['POST'])
 @token_required
-def deleteFile(current_user, filename):
+def deleteFile(current_user, isAdmin, filename):
 	try:
 		rack = Files.query.filter_by(name=secure_filename(filename)).first().rack
 	except AttributeError:
@@ -205,10 +213,26 @@ def deleteFile(current_user, filename):
 	db.session.commit()
 	return jsonify({"message": "Successfully deleted!", "status_code": 201})
 
+@app.route('/isAdmin', methods=['GET'])
+@token_required
+def isAdmin(current_user, isAdmin):
+	if(isAdmin):
+		resp = jsonify({'message' : 'You\'re an admin!!', 'status_code': 200})
+		resp.status_code = 200
+		return resp
+	else:
+		resp = jsonify({'message' : 'You\'re not an admin!!', 'status_code': 400})
+		resp.status_code = 400
+		return resp
+
 @app.route('/admin/config', methods=['POST'])
 @token_required
-def configureServer(current_user):
+def configureServer(current_user, isAdmin):
 	# check if the post request has the file part
+	if(not isAdmin):
+		resp = jsonify({'message' : 'You\'re not an admin!!', 'status_code': 400})
+		resp.status_code = 400
+		return resp
 	if 'file' not in request.files:
 		resp = jsonify({'message' : 'No file part in the request'})
 		resp.status_code = 400
@@ -221,9 +245,11 @@ def configureServer(current_user):
 	if file:
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+		yaml.load(open(os.path.join(app.config['UPLOAD_FOLDER'], filename)).read())
 		resp = jsonify({'message' : 'YAML successfully loaded', "status_code": 201})
 		resp.status_code = 201
 		return resp
+
 
 if __name__ == '__main__':
 	app.run(host="0.0.0.0", debug=True)

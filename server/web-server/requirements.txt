@@ -1,6 +1,7 @@
 Flask
-PyJWT
+PyJWT==1.5.0
+cryptography
 Flask-SqlAlchemy
 SQLAlchemy
 Werkzeug
-4.2b4
+pyyaml==4.2b4
