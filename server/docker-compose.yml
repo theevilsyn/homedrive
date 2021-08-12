@@ -19,6 +19,21 @@ services:
     #         default:
     #             ipv4_address: 172.30.0.2
 
+    # ns:
+    #     <<: *limits
+    #     build: ./ns
+    #     networks:
+    #         default:
+    #             ipv4_address: 172.30.0.2
+    #     environment:
+    #         ZONE_DOMAIN: home.drive
+    #         ZONE_HOSTS: rack1=172.30.35.2
+    #         ZONE_HOSTS: rack2=172.30.35.3
+    #         ZONE_HOSTS: rack3=172.30.35.4
+    #         ZONE_HOSTS: rack4=172.30.35.5
+    #         ZONE_HOSTS: rack5=172.30.35.6
+    #     restart: unless-stopped
+
     exploiter:
         <<: *limits
         build: ./exploiter
@@ -26,18 +41,18 @@ services:
         restart: unless-stopped
         networks:
             default:
-                ipv4_address: 172.30.0.2
+                ipv4_address: 172.30.0.14
 
-    # rack1:
-    #     <<: *limits
-    #     build: ./racks/rack1
-    #     image: pentest/private.rack1
-    #     restart: unless-stopped
-    #     ports:
-    #       - 2121:0021
-    #     networks:
-    #         default:
-    #             ipv4_address: 172.30.0.3
+    rack1:
+        <<: *limits
+        build: ./racks
+        image: pentest/private.rack1
+        restart: unless-stopped
+        ports:
+          - 2121:0021
+        networks:
+            default:
+                ipv4_address: 172.30.0.3
 
     web-server:
         <<: *limits
@@ -51,9 +66,11 @@ services:
         networks:
             default:
                 ipv4_address: 172.30.0.8
-        # depends_on:
-            # - rack1
 
+
+## TODO hidden network
+# external_links: 
+#     - shared_gitlab_1: gitlab
 
 networks:
     default:

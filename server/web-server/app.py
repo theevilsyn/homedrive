@@ -73,7 +73,7 @@ def token_required(function):
 		return function(current_user, isAdmin=isAdmin, *args, **kwargs)
 	return decorated
 
-
+## stop admin regs
 @app.route('/register', methods=['POST'])
 def create_user():
 	data = request.get_json(force=True)

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 NAME=rack1
-PASS=passwordforstorage1
+PASS=brutablebrutablebrutablepasssssss
 FOLDER="/ftp/$NAME"
 
 echo -e "$PASS\n$PASS" | adduser -h $FOLDER -s /sbin/nologin $NAME
