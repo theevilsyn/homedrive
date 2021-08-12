@@ -1,14 +1,12 @@
 package com.bios.serverack.data.remote
 
-import com.bios.serverack.BuildConfig
 import com.bios.serverack.data.model.Signup
 import com.bios.serverack.data.model.User
+import com.bios.serverack.data.repository.Repository
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -16,7 +14,7 @@ import retrofit2.http.*
 import java.util.concurrent.TimeUnit
 
 
-const val API_POINT = BuildConfig.API_POINT
+val API_POINT = Repository().getServerEndPoint()
 
 
 var logging = HttpLoggingInterceptor()
@@ -62,12 +60,10 @@ interface NetworkService {
         @Path("filename") filename: String
     ): String
 
-    @Streaming
-    @GET("download/{filename}")
-    suspend fun downloadFile(
+    @GET("isAdmin")
+    suspend fun isAdmin(
         @Header("x-access-token") token: String,
-        @Path("filename") filename: String
-    ): Response<ResponseBody>
+    ): String
 
 
 }

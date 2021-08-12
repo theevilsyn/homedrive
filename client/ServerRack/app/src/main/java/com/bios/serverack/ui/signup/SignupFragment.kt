@@ -11,6 +11,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bios.serverack.R
+import com.bios.serverack.Utils
 import com.bios.serverack.databinding.FragmentSignupBinding
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
@@ -37,23 +38,39 @@ class SignupFragment : Fragment() {
         }
 
         signupBinding.signUpButton.setOnClickListener {
-            if (validateData()) {
-                val username: String = signupBinding.usernameEdittext.text.toString()
-                val email: String = signupBinding.emailEditText.text.toString()
-                val password: String = signupBinding.passwordEdittext.text.toString()
-                signUpViewModel.doSignUp(username, password, email);
+            if (Utils.isNetworkAvailable(requireActivity())) {
+                if (validateData()) {
+                    activity?.let { it1 ->
+                        signUpViewModel.hideKeyboardFrom(
+                            it1,
+                            signupBinding.root
+                        )
+                    }
+                    val username: String = signupBinding.usernameEdittext.text.toString()
+                    val email: String = signupBinding.emailEditText.text.toString()
+                    val password: String = signupBinding.passwordEdittext.text.toString()
+                    signUpViewModel.doSignUp(username, password, email);
+                }
+            } else {
+                showSnackBar("Please connect to internet")
             }
         }
         signUpViewModel.doSignUp.observe(viewLifecycleOwner, {
-            if (it != "Username already in use!") {
-                showSnackBar(it, Snackbar.LENGTH_LONG)
-            } else {
-                showSnackBar(it, Snackbar.LENGTH_LONG)
-                Handler(Looper.getMainLooper()).postDelayed({
-                    this.findNavController()
-                        .navigate(SignupFragmentDirections.actionSignupFragmentToLoginFragment())
-                }, 3000)
+            when {
+                it != "Username already in use!" -> {
+                    showSnackBar(it, Snackbar.LENGTH_LONG)
+                }
+                it == "Is your Internet On ?" -> {
+                    showSnackBar(it, Snackbar.LENGTH_LONG)
+                }
+                else -> {
+                    showSnackBar(it, Snackbar.LENGTH_LONG)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        this.findNavController()
+                            .navigate(SignupFragmentDirections.actionSignupFragmentToLoginFragment())
+                    }, 3000)
 
+                }
             }
         })
 
@@ -62,7 +79,7 @@ class SignupFragment : Fragment() {
     }
 
 
-    fun validateData(): Boolean {
+    private fun validateData(): Boolean {
         val username: String = signupBinding.usernameEdittext.text.toString()
         val email: String = signupBinding.emailEditText.text.toString()
         val password: String = signupBinding.passwordEdittext.text.toString()

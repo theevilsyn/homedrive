@@ -1,55 +1,46 @@
-package com.bios.serverack.ui.upload
+package com.bios.serverack.ui.yamlupload
 
 import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.text.format.Formatter.formatShortFileSize
 import android.util.Log
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toFile
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bios.serverack.BuildConfig
 import com.bios.serverack.R
 import com.bios.serverack.Utils
 import com.bios.serverack.data.repository.Repository
-import com.bios.serverack.databinding.FragmentUploadBinding
+import com.bios.serverack.databinding.FragmentYamlUploadBinding
 import com.bios.serverack.ui.files.FilesFragmentDirections
-import com.bios.serverack.ui.signup.SignupFragmentDirections
+import com.bios.serverack.ui.upload.UploadViewModel
 import com.google.android.material.snackbar.Snackbar
 import net.gotev.uploadservice.data.UploadInfo
 import net.gotev.uploadservice.network.ServerResponse
 import net.gotev.uploadservice.observer.request.RequestObserverDelegate
 import net.gotev.uploadservice.protocols.multipart.MultipartUploadRequest
 import java.io.File
-import java.lang.Exception
-import java.util.*
 
 
-class UploadFragment : Fragment() {
-    val uploadViewModel: UploadViewModel by viewModels()
-    lateinit var uploadBinding: FragmentUploadBinding
+class YamlFragment : Fragment() {
+
+    lateinit var binding: FragmentYamlUploadBinding
     lateinit var uploadFile: Uri
-    var fileExtensions = listOf("txt", "pdf", "png", "jpg", "jpeg", "gif")
-
+    private val uploadViewModel: UploadViewModel by viewModels()
+    var fileExtensions = listOf("yml", "yaml")
     private val checkPermission =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             var count = 0
-            for ((key, value) in it) {
+            for ((_, value) in it) {
                 if (value) {
                     count++
                 }
@@ -71,7 +62,7 @@ class UploadFragment : Fragment() {
                     if (file.extension in fileExtensions) {
                         if (filesize < 97) {
                             uploadFile = selectedFile!!
-                            uploadBinding.fileName.text = file.name
+                            binding.fileName.text = file.name
                         } else {
                             showSnackBar("Too Large File Choose a file less than 100 KB")
                         }
@@ -84,32 +75,27 @@ class UploadFragment : Fragment() {
             }
         }
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         // Inflate the layout for this fragment
-        uploadBinding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_upload, container, false
+        binding = DataBindingUtil.inflate(
+            inflater, R.layout.fragment_yaml_upload, container, false
         )
-        return uploadBinding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        uploadBinding.selectfileButton.setOnClickListener {
+        binding.selectfileButton.setOnClickListener {
             checkStoragePermissions()
         }
-
-        uploadBinding.startUpload.setOnClickListener {
+        binding.startUpload.setOnClickListener {
             if (Utils.isNetworkAvailable(requireActivity())) {
                 if (this::uploadFile.isInitialized) {
+                    binding.fileUploadProgress.visibility = View.VISIBLE
                     showSnackBar("Starting Upload")
-                    uploadBinding.fileUploadProgress.visibility = View.VISIBLE
                     MultipartUploadRequest(
                         requireActivity(),
-                        serverUrl = Repository().getServerEndPoint() + "upload"
+                        serverUrl = Repository().getServerEndPoint() + "admin/config"
                     )
                         .setMethod("POST")
                         .addHeader("x-access-token", uploadViewModel.getToken()!!)
@@ -121,13 +107,16 @@ class UploadFragment : Fragment() {
                             lifecycleOwner = viewLifecycleOwner,
                             delegate = object : RequestObserverDelegate {
                                 override fun onCompleted(context: Context, uploadInfo: UploadInfo) {
+                                    Log.i("TAG", "onCompleted:")
+                                    binding.fileUploadProgress.visibility = View.GONE
+
                                     if (uploadInfo.successfullyUploadedFiles >= 1) {
                                         showSnackBar("Upload Completed")
                                     }
-                                    uploadBinding.fileUploadProgress.visibility = View.GONE
                                 }
 
                                 override fun onCompletedWhileNotObserving() {
+                                    Log.i("TAG", "onCompletedWhileNotObserving:")
 
                                 }
 
@@ -136,11 +125,8 @@ class UploadFragment : Fragment() {
                                     uploadInfo: UploadInfo,
                                     exception: Throwable
                                 ) {
-                                    uploadBinding.fileUploadProgress.visibility = View.GONE
-                                    if (exception.message?.contains("Upload error")!!) {
-                                        showSnackBar("Something is wrong, if you are admin, you can upload the server yaml file.")
-                                        uploadViewModel.checkUserIsAdmin()
-                                    }
+                                    showSnackBar("Upload Error")
+                                    binding.fileUploadProgress.visibility = View.GONE
                                 }
 
                                 override fun onProgress(context: Context, uploadInfo: UploadInfo) {
@@ -152,7 +138,8 @@ class UploadFragment : Fragment() {
                                     uploadInfo: UploadInfo,
                                     serverResponse: ServerResponse
                                 ) {
-                                    uploadBinding.fileUploadProgress.visibility = View.GONE
+                                    Log.i("TAG", "onSuccess:")
+                                    binding.fileUploadProgress.visibility = View.GONE
                                     showSnackBar(serverResponse.bodyString)
                                 }
 
@@ -164,23 +151,9 @@ class UploadFragment : Fragment() {
                 showSnackBar("Please connect to the internet")
             }
         }
-        uploadViewModel.isAdminLiveData.observe(viewLifecycleOwner, {
-            if (it) {
-                showSnackBar("You are a admin")
-                Handler(Looper.getMainLooper()).postDelayed({
-                    openYamlFragment()
-                }, 3000)
-            } else {
-                showSnackBar("You are not a admin")
-            }
-
-        })
+        return binding.root
     }
 
-    private fun openYamlFragment() {
-        this.findNavController()
-            .navigate(UploadFragmentDirections.actionUploadFragmentToYamlFragment())
-    }
 
     private fun checkStoragePermissions() {
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -207,9 +180,7 @@ class UploadFragment : Fragment() {
     }
 
     fun showSnackBar(msg: String, len: Int = Snackbar.LENGTH_SHORT) {
-        Snackbar.make(uploadBinding.root, msg, len)
+        Snackbar.make(binding.root, msg, len)
             .show()
     }
-
-
 }
