@@ -69,10 +69,8 @@ class FilesViewModel : ViewModel() {
     }
 
     fun downloadFile(message: Message) {
-        viewModelScope.launch {
-            val deleteFile = repository.downloadFile(message.filename)
-            repository.saveFile(deleteFile.body()!!, message)
-        }
+        val id = repository.downloadFile(message.filename)
+        messageHandler.value = "Downloading {${message.filename}}"
     }
 
 

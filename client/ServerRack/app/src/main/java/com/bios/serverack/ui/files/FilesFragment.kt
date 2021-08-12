@@ -14,6 +14,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bios.serverack.R
+import com.bios.serverack.Utils
 import com.bios.serverack.data.model.Message
 import com.bios.serverack.databinding.FragmentFilesBinding
 import com.google.android.material.snackbar.Snackbar
@@ -66,11 +67,15 @@ class FilesFragment : Fragment() {
         fileViewModel.messageData.observe(viewLifecycleOwner, {
             filesAdapter =
                 FilesAdapter(FilesAdapter.OnClickListener { message: Message, view: View ->
-                    if (view.id == R.id.deleteButton) {
-                        fileViewModel.deleteFile(message)
+                    if (Utils.isNetworkAvailable(requireActivity())) {
+                        if (view.id == R.id.deleteButton) {
+                            fileViewModel.deleteFile(message)
+                        } else {
+                            this.message = message
+                            checkStoragePermissions()
+                        }
                     } else {
-                        this.message = message
-                        checkStoragePermissions()
+                        showSnackBar("Please connect to the internet")
                     }
                 })
             filesBinding.filesList.apply {
@@ -91,7 +96,7 @@ class FilesFragment : Fragment() {
     }
 
 
-    fun showSnackBar(msg: String, len: Int = Snackbar.LENGTH_SHORT) {
+    private fun showSnackBar(msg: String, len: Int = Snackbar.LENGTH_SHORT) {
         Snackbar.make(filesBinding.root, msg, len)
             .show()
     }
