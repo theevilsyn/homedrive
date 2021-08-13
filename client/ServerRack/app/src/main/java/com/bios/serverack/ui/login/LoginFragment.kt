@@ -9,7 +9,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bios.serverack.R
+import com.bios.serverack.Utils
 import com.bios.serverack.databinding.FragmentLoginBinding
+import com.google.android.material.snackbar.Snackbar
 
 class LoginFragment : Fragment() {
 
@@ -27,10 +29,15 @@ class LoginFragment : Fragment() {
         )
 
         loginBinding.loginButton.setOnClickListener {
-            if (!isEmpty()) {
-                val username = loginBinding.usernameEdittext.text.toString()
-                val password = loginBinding.passwordEdittext.text.toString()
-                loginViewModel.doLogin(username, password)
+            activity?.let { it1 -> loginViewModel.hideKeyboardFrom(it1, loginBinding.root) }
+            if (Utils.isNetworkAvailable(requireActivity())) {
+                if (!isEmpty()) {
+                    val username = loginBinding.usernameEdittext.text.toString()
+                    val password = loginBinding.passwordEdittext.text.toString()
+                    loginViewModel.doLogin(username, password)
+                }
+            } else {
+                showSnackBar("Please connect to internet")
             }
         }
 
@@ -39,7 +46,12 @@ class LoginFragment : Fragment() {
             if (it) {
                 this.findNavController()
                     .navigate(LoginFragmentDirections.actionLoginFragmentToFilesFragment())
+            }
+        })
 
+        loginViewModel.messageHandler.observe(viewLifecycleOwner, {
+            if (it.isNotEmpty()) {
+                showSnackBar(it)
             }
         })
 
@@ -70,8 +82,11 @@ class LoginFragment : Fragment() {
             loginBinding.passwordTextInputLayout.error = "Password is empty"
             return true
         }
-
-
         return false
+    }
+
+    fun showSnackBar(msg: String, len: Int = Snackbar.LENGTH_SHORT) {
+        Snackbar.make(loginBinding.root, msg, len)
+            .show()
     }
 }

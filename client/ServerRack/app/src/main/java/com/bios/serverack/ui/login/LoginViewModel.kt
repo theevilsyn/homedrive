@@ -11,12 +11,18 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.Exception
+import android.app.Activity
+import android.content.Context
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+
 
 class LoginViewModel : ViewModel() {
     private val viewModelJob = SupervisorJob()
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
     private val repository = Repository()
-    val doLogin = MutableLiveData<Boolean>(false)
+    val doLogin = MutableLiveData(false)
+    val messageHandler = MutableLiveData("")
 
 
     fun doLogin(userName: String, password: String) {
@@ -27,6 +33,7 @@ class LoginViewModel : ViewModel() {
                 repository.doLoginService(User(userName, password))
             } catch (e: Exception) {
                 Log.i("LoginData", "doLogin:${e.printStackTrace()}")
+                messageHandler.value = "Invalid Username or Password"
                 ""
             }
             if (loginInfo.isNotEmpty()) {
@@ -36,6 +43,12 @@ class LoginViewModel : ViewModel() {
             }
         }
 
+    }
+
+    fun hideKeyboardFrom(context: Context, view: View) {
+        val imm: InputMethodManager =
+            context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0)
     }
 
 }

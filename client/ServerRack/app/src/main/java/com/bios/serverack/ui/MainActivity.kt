@@ -1,9 +1,10 @@
-package com.bios.serverack
+package com.bios.serverack.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.NavHostFragment
+import com.bios.serverack.R
 import com.bios.serverack.databinding.ActivityMainBinding
 
 lateinit var activityBinding: ActivityMainBinding
