@@ -10,34 +10,35 @@ x-limits: &limits
             max-file: '3'
 
 services:
-    # rackdns:
-    #     <<: *limits
-    #     build: ./dns
-    #     image: pentest/private.dns
-    #     restart: unless-stopped
-    #     networks:
-    #         default:
-    #             ipv4_address: 172.30.0.2
+    router:
+        <<: *limits
+        build: ./router
+        image: naumachia/schmidt.router
+        hostname: router.schmidt.naum
+        networks:
+            default:
+                ipv4_address: 172.30.0.1
+            hidden:
+                ipv4_address: 172.30.35.1
+        sysctls:
+            net.ipv4.ip_forward: 1
+        restart: unless-stopped
 
-    # ns:
-    #     <<: *limits
-    #     build: ./ns
-    #     networks:
-    #         default:
-    #             ipv4_address: 172.30.0.2
-    #     environment:
-    #         ZONE_DOMAIN: home.drive
-    #         ZONE_HOSTS: rack1=172.30.35.2
-    #         ZONE_HOSTS: rack2=172.30.35.3
-    #         ZONE_HOSTS: rack3=172.30.35.4
-    #         ZONE_HOSTS: rack4=172.30.35.5
-    #         ZONE_HOSTS: rack5=172.30.35.6
-    #     restart: unless-stopped
+    ns:
+        <<: *limits
+        build: ./ns
+        networks:
+            default:
+                ipv4_address: 172.30.0.2
+        environment:
+            ZONE_DOMAIN: home.drive
+            ZONE_HOSTS: manager=172.30.0.8 rack1=172.30.35.2 rack2=172.30.35.3 rack3=172.30.35.4 rack4=172.30.35.5 rack5=172.30.35.6
+        restart: unless-stopped
 
     exploiter:
         <<: *limits
         build: ./exploiter
-        image: pentest/private.exploiter
+        image: naumachia/homedrive.exploiter
         restart: unless-stopped
         networks:
             default:
@@ -45,37 +46,68 @@ services:
 
     rack1:
         <<: *limits
-        build: ./racks
-        image: pentest/private.rack1
+        build: ./racks/rack1
+        image: naumachia/homedrive.rack1
         restart: unless-stopped
-        ports:
-          - 2121:0021
         networks:
             default:
-                ipv4_address: 172.30.0.3
+                ipv4_address: 172.30.35.2
+
+    rack2:
+        <<: *limits
+        build: ./racks/rack2
+        image: naumachia/homedrive.rack2
+        restart: unless-stopped
+        networks:
+            default:
+                ipv4_address: 172.30.35.3
+
+    rack3:
+        <<: *limits
+        build: ./racks/rack3
+        image: naumachia/homedrive.rack3
+        restart: unless-stopped
+        networks:
+            default:
+                ipv4_address: 172.30.35.4
+
+    rack4:
+        <<: *limits
+        build: ./racks/rack4
+        image: naumachia/homedrive.rack4
+        restart: unless-stopped
+        networks:
+            default:
+                ipv4_address: 172.30.35.5
 
     web-server:
         <<: *limits
         build: ./web-server
-        image: pentest/private.web-server
+        image: naumachia/homedrive.webserver
         restart: unless-stopped
-        ports: 
-          - 5000:5000
         dns: 
-          - rackdns
+          - ns
         networks:
             default:
                 ipv4_address: 172.30.0.8
 
 
-## TODO hidden network
-# external_links: 
-#     - shared_gitlab_1: gitlab
 
 networks:
     default:
-        driver: bridge
+        driver: l2bridge
         ipam:
-            driver: default
+            driver: static
             config:
                 - subnet: 172.30.0.0/28
+        driver_opts:
+            l2bridge.gateway: 172.30.0.1
+
+    hidden:
+        driver: l2bridge
+        ipam:
+            driver: static
+            config:
+                - subnet: 172.30.35.0/28
+        driver_opts:
+            l2bridge.gateway: 172.30.35.1

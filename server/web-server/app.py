@@ -7,6 +7,7 @@ from functools import wraps
 from ftplib import FTP
 from os import environ
 
+import dns.resolver
 import jwt
 from sqlalchemy.orm import immediateload
 import yaml
@@ -20,16 +21,17 @@ app = Flask(__name__)
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
+app.config['DNS'] = dns.resolver.Resolver()
+app.config['DNS'].nameservers = ['172.30.0.2']
+
 app.config['PRIVATE_KEY'] = open(environ['PRIVATE_KEY']).read()
 app.config['PUBLIC_KEY'] = open(environ['PUBLIC_KEY']).read()
+app.config['RACKS'] = yaml.load(open("config.yaml").read())['racks']
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{environ['DB_PATH']}"
 app.config['UPLOAD_FOLDER'] = "/tmp"
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024
 
-
-
 db = SQLAlchemy(app)
-
 
 class User(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -86,6 +88,9 @@ def create_user():
 	elif(email):
 		return jsonify({"message": "Email already in use!"})
 
+	if uname == "admin":
+		return jsonify({"message": "Nah nah! you can't be an admin!!", "status_code": 400})
+
 	hashed_password = generate_password_hash(data['password'], method='sha256')
 
 	new_user = User(public_id=str(uuid.uuid4()),
@@ -132,23 +137,23 @@ def uploadFile(current_user, isAdmin):
 	if file and allowed_file(file.filename):
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-		rack = f"rack{random.randint(1,1)}"
+		rack = random.choice(app.config['RACKS'])
 
 		new_file = Files(
 			id=str(uuid.uuid4()),
 			name=filename,
 			user_id = current_user.public_id,
-			rack=int(rack[-1]),
+			rack=int(rack['name'][-1]),
 			size=os.path.getsize(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 		)
 
 		try:
-			_ =  FTP(rack, rack, passwd=f"passwordforstorage{rack[-1]}")
+			_ =  FTP(app.config['DNS'].query(rack['domain'], 'A')[0].to_text(), rack['user'], passwd=rack['password'], timeout=10)
 			__ = open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), "rb")
 			_.storbinary(f"STOR {secure_filename(filename)}", __); _.close(); __.close()
 			os.remove(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)))
 		except:
-			resp = jsonify({'message' : 'Something\'s Wrong with the Racks!!', "status_code": 503})
+			resp = jsonify({'message' : 'Oops!!, the storage rack is not accessible!', "status_code": 503})
 			resp.status_code = 503
 			return resp
 		
@@ -173,10 +178,10 @@ def downloadFile(current_user, isAdmin, filename):
 		resp.status_code = 404
 		return resp
 	try:
-		with FTP(f"rack{rack}", f"rack{rack}", passwd=f"passwordforstorage{rack}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
+		with FTP(app.config['DNS'].query(app.config['RACKS'][rack]['domain'], 'A')[0].to_text(), app.config['RACKS'][rack]['user'], passwd=app.config['RACKS'][rack]['password'], timeout=10) as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
 			_.retrbinary(f"RETR {secure_filename(filename)}", __.write)
 	except:
-		resp = jsonify({'message' : 'Something\'s Wrong with the Racks!!', "status_code": 503})
+		resp = jsonify({'message' : 'Oops!!, the storage rack is not accessible!', "status_code": 503})
 		resp.status_code = 503
 		return resp
 
@@ -202,10 +207,10 @@ def deleteFile(current_user, isAdmin, filename):
 		resp.status_code = 404
 		return resp
 	try:
-		with FTP(f"rack{rack}", f"rack{rack}", passwd=f"passwordforstorage{rack}") as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
+		with FTP(app.config['DNS'].query(app.config['RACKS'][rack]['domain'], 'A')[0].to_text(), app.config['RACKS'][rack]['user'], passwd=app.config['RACKS'][rack]['password'], timeout=10) as _, open(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename)), 'wb') as __:
 			_.delete(secure_filename(filename))
 	except:
-		resp = jsonify({'message' : 'Something\'s Wrong with the Racks!!', "status_code": 503})
+		resp = jsonify({'message' : 'Oops!!, the storage rack is not accessible!', "status_code": 503})
 		resp.status_code = 503
 		return resp
 

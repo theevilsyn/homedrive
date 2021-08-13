@@ -2,7 +2,7 @@ FROM python
 
 RUN apt update; apt -y --autoremove full-upgrade
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt install gcc -y
+RUN apt install gcc dnsutils -y
 
 COPY . /app
 WORKDIR /app

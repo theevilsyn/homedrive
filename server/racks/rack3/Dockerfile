@@ -9,4 +9,7 @@ RUN mkdir /ftp
 
 STOPSIGNAL SIGKILL
 
+RUN mkdir /var/keys
+COPY mykey.pub /var/keys
+
 ENTRYPOINT ["/bin/start.sh"]

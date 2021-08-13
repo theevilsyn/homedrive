@@ -5,3 +5,4 @@ Flask-SqlAlchemy
 SQLAlchemy
 Werkzeug
 pyyaml==4.2b4
+dnspython
